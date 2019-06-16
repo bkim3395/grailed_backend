@@ -58,11 +58,11 @@ This Rails project implements Model components but neglects controller and view 
 
 ### User.find_disallowed_usernames
 
-This class methods returns ActiveRecord:Relation object of all users that have forbidden usernames.
+    This class method returns ActiveRecord:Relation object of all users that have
+    forbidden usernames.
 
-DisallowedUsername.all returns 7 rows of forbidden usernames.
-
-Number of User rows with forbidden usernames (before altering db): 25
+    DisallowedUsername.all returns 7 rows of forbidden usernames.
+    Number of User rows with forbidden usernames (before altering db): 25
 
 ### User.resolve_duplicates(dry_run)
 
@@ -70,39 +70,39 @@ Number of User rows with forbidden usernames (before altering db): 25
     an incrementing integer to the username string. The first occurance of username
     value will be ignored.
 
-    It accepts one argument called "dry_run". Its default value is false. 
-    If dry_run is false, then the function will alter the rows to resolve the 
-    conflicts and update the database. If it is true, no alternation to the 
-    database would be made.
+    It accepts a argument called "dry_run". Its default value is false. 
+    If it's false, then the function will alter the rows to resolve the 
+    conflicts and update the database. If it's true, no alternation to the 
+    database would be made and print the user row that have same usernames on console instead.
 
     The function will return an ActiveRecord:Relations object that will
     contain all User rows that have duplicate usernames with another User row.
-    If dry_run was true, it will show updated usernames for each user row.
+    If dry_run was false, it will show updated usernames for each user row.
 
     This function ignores duplicate usernames that are disallowed because that
     is handled by User.resolve_forbidden_usernames separately. 
 
-    Number of User Rows that have duplicate usernames (before db alterncations): 681
+    Number of User Rows that have duplicate allowed usernames (before db alterations): 681
 
 ### User.resolve_forbidden_usernames(dry_run)
 
     This class method resolves users that have forbidden usernames listed on
-    disallowed_usernames table by concating an incrementing integer to the username.
+    disallowed_usernames table by concating an incrementing integer to the username string.
     By incrementing an integer, it also solves users that share same forbidden usernames.
     The difference between this function and User.resolve_duplicates is that the first occurance
     is not ignored and its username is concatinated with an integer so that no user has 
     disallowed usernames.   
 
-    Like User.resolve_duplicates, it accepts one argument called "dry_run".
+    Like User.resolve_duplicates, it accepts a argument called "dry_run".
     If dry_run is false, then the function will alter the rows to resolve the 
     conflicts and update the database. If it is true, no alternation to the 
-    database would be made.
+    database would be made and print the user row that have forbidden usernames on console instead.
 
     The function will return an ActiveRecord:Relations object that will
     contain all User rows that have disallowed usernames.
-    If dry_run was true, it will show updated usernames for each user row.
+    If dry_run was false, it will show updated usernames for each user row.
 
-    Number of User Rows that have duplicate usernames (before db alterncations): 25
+    Number of User Rows that have forbidden usernames (before db alterations): 25
 
 ### User.is_all_users_valid?
 
