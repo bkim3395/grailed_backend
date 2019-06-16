@@ -1,97 +1,120 @@
-Set up:
-
-rails new grailed_backend --database=sqlite3 --skip-turbolinks
-
-Change database.yml so that database is pointing to db/grailed.sqlite3
-
-bundle exec rails db:schema:dump
-
-bundle exec rails c
-
-cp grailed-exercise.sqlite3 db/grailed-exercise.sqlite3
-
 <p align="center">
-  <img width="150" height="150" src="https://raw.githubusercontent.com/bkim3395/Melp/master/app/assets/images/newnewlogo.png">
+  <img width="200" height="200" src="https://raw.githubusercontent.com/bkim3395/grailed_backend/master/app/assets/images/grailed_image.jpeg">
 </p>
 
 # Grailed Backend Project Submission by Bumsoo Kim
 
-## Objectives of the project
-+ 
+## Functions
++ Find all users with disallowed usernames noted on disallowed_username table.
++ Resolve all username collisions and alter the database accordingly.
++ Resolve all disallowed usernames and alter the database accordingly.
 
-## Technologies Used
-+ Ruby on Rails
-+ SQLite
+## Usage
 
+To get started, open a terminal and type:
 
-## Registration and Geolocation API
-
-[geoloc-gif]: https://raw.githubusercontent.com/bkim3395/Melp/master/app/assets/images/github%20readme%20images/geoloc.gif "Geolocation Demo"
-![alt text][geoloc-gif]
-
-Geolocation API can access a user's location. This location will be used as the center for Google Map API in Search page. If a user refuses to give their location, the default location is used for the center.
-
-## Search and Google Map API
-
-[search-gif]: https://raw.githubusercontent.com/bkim3395/Melp/master/app/assets/images/github%20readme%20images/search.gif "Search Demo"
-![alt text][search-gif]
-
-User can search for restaurants in their local area. User may leave the search box blank to see all types of restuarants or filter by cuisine or name of the restaurant. In search page, all restaurants filtered by search terms and within the boundary of Google Map API are shown. The markers on the map represent the restaurants shown in the page. If the map is moved or new search term is entered, the list of restaurants will change accordingly.
-
-Below is the code responsible for fetching businesses according to search terms and map boundary.
-
-``` ruby
-    def self.bounds_search(term, bounds)
-
-        if(term.include?("%20"))
-            arr = term.split("%20")
-        else
-            arr = term.split(" ")
-        end
-        new_term = arr.join(" ")
-
-        if(arr.length == 2 && arr[1].downcase == "food")
-            cuisine = arr[0].capitalize;
-            return Business.with_attached_photos.where(["cuisine iLIKE ? AND (latitude BETWEEN ? AND ?) AND (longitude BETWEEN ? AND ?)", 
-                                                        cuisine,
-                                                        bounds[:southWest][:lat] ,bounds[:northEast][:lat],
-                                                        bounds[:southWest][:lng] ,bounds[:northEast][:lng]])
-        elsif(new_term.downcase.include?("coffee") || new_term.downcase.include?("cafe"))
-            return Business.with_attached_photos.where(["cuisine = ? AND (latitude BETWEEN ? AND ?) AND (longitude BETWEEN ? AND ?)", 
-                                                        "Coffee",
-                                                        bounds[:southWest][:lat] ,bounds[:northEast][:lat],
-                                                        bounds[:southWest][:lng] ,bounds[:northEast][:lng]])
-        else
-            result = Business.with_attached_photos.where(["LOWER(name) LIKE ? AND (latitude BETWEEN ? AND ?) AND (longitude BETWEEN ? AND ?",
-                                                        "%#{new_term.downcase}%",
-                                                        bounds[:southWest][:lat] ,bounds[:northEast][:lat],
-                                                        bounds[:southWest][:lng] ,bounds[:northEast][:lng]])
-            if(result.length == 0 && arr.length == 1)
-                return Business.with_attached_photos.where(["cuisine iLIKE ? AND (latitude BETWEEN ? AND ?) AND (longitude BETWEEN ? AND ?)",
-                                                        new_term,  
-                                                        bounds[:southWest][:lat] ,bounds[:northEast][:lat],
-                                                        bounds[:southWest][:lng] ,bounds[:northEast][:lng]])
-            end
-            return result
-        end    
-    end
+``` 
+    bundle exec rails c
 ```
 
-## Business Show Page
+On Rails console, you can run User class methods such as:
 
-[business-1]: https://raw.githubusercontent.com/bkim3395/Melp/master/app/assets/images/github%20readme%20images/business_1.png "Business Page-1"
-![alt text][business-1]
+``` Ruby
+    User.find_disallowed_usernames
 
-[business-2]: https://raw.githubusercontent.com/bkim3395/Melp/master/app/assets/images/github%20readme%20images/business_2.png "Business Page-2"
-![alt text][business-2]
+    User.resolve_duplicates(dry_run)
 
-In the business show page, a user can browse information about the specific business they selected. It contains Google Map of business's location, its ratings, address, phone number, link to its website and three photos related to the business. If a user is logged in and did not review the business yet, they can press "Write a Review" button to do so. 
+    User.resolve_forbidden_usernames(dry_run)
 
-Below the section containing the business's information, there are list of reviews on that particular business. Each review contains the reviewer's name, ratings, text, and, optionally, photo if one or more photos were submitted with the review.
+    User.is_all_users_valid?
 
-## Review Submission Page
+    User.resolve_all
 
-[review]: https://raw.githubusercontent.com/bkim3395/Melp/master/app/assets/images/github%20readme%20images/Review%20Submission.gif "Review Submission"
-![alt text][review]
+```
 
-On Review submission page, the user must give ratings and review texts to successfully submit a review. Optionally, the user may submit one or more photos related to the review. If the photos exceeds 1mB, the website will warn the user and ask them to submit the review again with less data. If the review was successfully submitted, the user will be redirected to business show page. The ratings of the business would be calculated and updated according to the ratings given in the submitted review.
+To restore the database to the unaltered state: exit the Rails console and type:
+
+```
+    cp grailed-exercise.sqlite3 db/grailed-exercise.sqlite3
+```
+
+This will overwrite the database being used with the backup.
+
+
+## The Points of Interest
+
+Some of the codes have been generated by Ruby on Rails. The following files below have been manually created or altered:
+
++ grailed-exercise.sqlite3
++ app/models/disallowed_username.rb
++ app/models/user.rb
++ config/database.yml
++ db/grailed-exercise.sqlite3
++ db/schema.rb
+
+This Rails projects implements Model components but neglects controller and view component as only concern of this project has been the manipulation of the database.
+
+## Documentations of implemented functions
+
+### User.find_disallowed_usernames
+
+    This class methods returns ActiveRecord:Relation of all users that have
+    forbidden usernames.
+
+    DisallowedUsername.all returns 7 rows of forbidden usernames.
+    Number of User rows with forbidden usernames (before altering db): 25
+
+### User.resolve_duplicates(dry_run)
+
+    This class method resolves users that share same username by concatenting 
+    an incrementing integer to the username string. The first occurance of username
+    value will be ignored.
+
+    It accepts one argument called "dry_run". Its default value is false. 
+    If dry_run is false, then the function will alter the rows to resolve the 
+    conflicts and update the database. If it is true, no alternation to the 
+    database would be made.
+
+    The function will return an ActiveRecord:Relations object that will
+    contain all User rows that have duplicate usernames with another User row.
+    If dry_run was true, it will show updated usernames for each user row.
+
+    This function ignores duplicate usernames that are disallowed because that
+    is handled by User.resolve_forbidden_usernames separately. 
+
+    Number of User Rows that have duplicate usernames (before db alterncations): 681
+
+### User.resolve_forbidden_usernames(dry_run)
+
+    This class method resolves users that have forbidden usernames listed on
+    disallowed_usernames table by concating an incrementing integer to the username.
+    By incrementing an integer, it also solves users that share same forbidden usernames.
+    The difference between this function and User.resolve_duplicates is that the first occurance
+    is not ignored and its username is concatinated with an integer so that no user has 
+    disallowed usernames.   
+
+    Like User.resolve_duplicates, it accepts one argument called "dry_run".
+    If dry_run is false, then the function will alter the rows to resolve the 
+    conflicts and update the database. If it is true, no alternation to the 
+    database would be made.
+
+    The function will return an ActiveRecord:Relations object that will
+    contain all User rows that have disallowed usernames.
+    If dry_run was true, it will show updated usernames for each user row.
+
+    Number of User Rows that have duplicate usernames (before db alterncations): 25
+
+### User.is_all_users_valid?
+
+     This function returns false if any user share a same username with another user or
+     if any user has a forbidden username. It returns true otherwise.
+
+### User.resolve.all
+
+    This function resolves both duplicate usernames and disallowed usernames for all users.
+    It will return true if all conflicts has been successfully resolved. It will return
+    false otherwise.
+
+## Comments
+
+My experience with Ruby on rails is about 0 ~ 1 years.
