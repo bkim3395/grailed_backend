@@ -73,7 +73,8 @@ class User < ApplicationRecord
     # Like User.resolve_duplicates, it accepts an argument called "dry_run".
     # If dry_run is false, then the function will alter the rows to resolve the 
     # conflicts and update the database. If it is true, no alteration to the 
-    # rows and the database would be made and print the user row that have forbidden usernames on console instead.
+    # rows and the database would be made and print the user row that have 
+    # forbidden usernames on console instead.
 
     # The function will return an ActiveRecord:Relations object that will
     # contain all User rows that have disallowed usernames.
