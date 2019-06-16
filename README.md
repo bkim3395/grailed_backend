@@ -73,7 +73,8 @@ This Rails project implements Model components but neglects Controller and View 
     It accepts an argument called "dry_run". Its default value is false. 
     If it's false, then the function will alter the rows to resolve the 
     conflicts and update the database. If it's true, no alteration to the 
-    rows and the database would be made and print the user row that have same usernames on console instead.
+    rows and the database would be made and print the user row that have same usernames 
+    on console instead.
 
     The function will return an ActiveRecord:Relations object that will
     contain all User rows that have duplicate usernames with another User row.
