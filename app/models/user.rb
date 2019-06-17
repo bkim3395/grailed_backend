@@ -13,18 +13,17 @@ class User < ApplicationRecord
         return(found_disallowed_users);
     end
 
-    # This class method resolves users that share same username by concatenting 
+    # This class method resolves users that have same username with another user by concatenting 
     # an incrementing integer to the username string. The first occurance of username
     # value will be ignored.
 
     # It accepts an argument called "dry_run". Its default value is false. 
-    # If it's false, then the function will alter the rows to resolve the 
-    # conflicts and update the database. If it's true, no alteration to the 
-    # rows and the database would be made and print the user row that have same usernames on console instead.
+    # If it's false, the changes to the rows would be saved to the database. 
+    # If it's true, the changes to the rows won't be saved to the database
+    # and instead the app will print altered User rows on Rails console.
 
     # The function will return an ActiveRecord:Relations object that will
-    # contain all User rows that have duplicate usernames with another User row.
-    # If dry_run was false, it will show updated usernames for each User row.
+    # contain all altered User rows that had duplicate usernames with another User row.
 
     # This function ignores duplicate usernames that are disallowed because that
     # is handled by User.resolve_forbidden_usernames separately. 
@@ -39,24 +38,25 @@ class User < ApplicationRecord
                             DisallowedUsername.select("invalid_username"));
         
 
-        if(dry_run)
-            duplicate_usernames.each do |user|
-                puts "User ID: #{user.id}, Username: #{user.username}"
-            end
-        else
 
-            duplicate_usernames.each do |user|
-                username = user.username;
 
-                if(!counter[username])
-                    counter[username] = 1; 
+        duplicate_usernames.each do |user|
+            username = user.username;
+
+            if(!counter[username])
+                counter[username] = 1;
+                puts "User ID: #{user.id}, Username: #{user.username}" if(dry_run)
+            else
+                user.username = username + counter[username].to_s 
+                counter[username] += 1;
+
+                if(dry_run)
+                    puts "User ID: #{user.id}, Username: #{user.username}"
                 else
-                    user.username = username + counter[username].to_s 
                     user.save!
-                    counter[username] += 1;
                 end
-
             end
+
         end
 
         return duplicate_usernames;
@@ -67,18 +67,16 @@ class User < ApplicationRecord
     # disallowed_usernames table by concating an incrementing integer to the username string.
     # By incrementing an integer, it also solves users that share same forbidden usernames.
     # The difference between this function and User.resolve_duplicates is that the first occurance
-    # is not ignored and its username is concatinated with an integer so that no user has 
+    # is not ignored and its username is concatinated with an integer so that no users have 
     # disallowed usernames.   
 
     # Like User.resolve_duplicates, it accepts an argument called "dry_run".
-    # If dry_run is false, then the function will alter the rows to resolve the 
-    # conflicts and update the database. If it is true, no alteration to the 
-    # rows and the database would be made and print the user row that have 
-    # forbidden usernames on console instead.
+    # If it's false, the changes to the rows would be saved to the database. 
+    # If it's true, the changes to the rows won't be saved to the database
+    # and instead the app will print altered User rows on Rails console.
 
     # The function will return an ActiveRecord:Relations object that will
-    # contain all User rows that have disallowed usernames.
-    # If dry_run was false, it will show updated usernames for each User row.
+    # contain all altered User rows that had disallowed usernames.
 
     # Number of User Rows that have forbidden usernames (before db alterations): 25
 
@@ -86,26 +84,24 @@ class User < ApplicationRecord
         
         counter = {};
         forbidden_usernames = User.find_disallowed_usernames
-        
-        if(dry_run)
-            forbidden_usernames.each do |user|
+
+        forbidden_usernames.each do |user|
+
+            username = user.username;
+
+            if(!counter[username])
+                counter[username] = 1;
+            end
+
+            user.username = username + counter[username].to_s 
+            counter[username] += 1;
+
+            if(dry_run)
                 puts "User ID: #{user.id}, Username: #{user.username}"
-            end
-        else
-
-            forbidden_usernames.each do |user|
-
-                username = user.username;
-
-                if(!counter[username])
-                    counter[username] = 1;
-                end
-
-                user.username = username + counter[username].to_s 
+            else
                 user.save!
-                counter[username] += 1;
-
             end
+
         end
 
         return forbidden_usernames;
