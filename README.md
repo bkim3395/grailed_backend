@@ -107,7 +107,7 @@ This Rails project implements Model components but neglects Controller and View 
      This function returns false if any user share a same username with another user or
      if any user has a forbidden username. It returns true otherwise.
 
-### User.resolve.all
+### User.resolve_all
 
     This function resolves both duplicate usernames and disallowed usernames for all users.
     It will return true if all conflicts has been successfully resolved. It will return
