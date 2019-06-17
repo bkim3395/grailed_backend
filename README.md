@@ -116,4 +116,5 @@ This Rails project implements Model components but neglects Controller and View 
 ## Comments
 
 This submission was made by Bumsoo Kim.
+
 My experience with Ruby on rails is about 0 ~ 1 years.
